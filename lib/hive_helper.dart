@@ -1,25 +1,16 @@
 import 'package:hive/hive.dart';
 import 'package:path_provider/path_provider.dart';
-import 'package:flutter/foundation.dart' show kIsWeb;
 
 
 class HiveHelper {
   static const String _boxName = 'swifty-companion';
 
-  static Future<String> getAppDirectory() async{
-    if(kIsWeb){
-      return '/';
-    }else{
-      final appDocumentDir = await getApplicationDocumentsDirectory();
-      return appDocumentDir.path;
-    }
-  }
   
   // Initialize Hive
   static Future<void> init() async {
     
-    final appDocumentDir = await getAppDirectory();
-      Hive.init(appDocumentDir);
+    final appDocumentDir = await getApplicationDocumentsDirectory();
+      Hive.init(appDocumentDir.path);
     
     await Hive.openBox(_boxName);
   }

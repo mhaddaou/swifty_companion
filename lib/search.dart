@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:swifty_companion/ApiCall.dart';
+import 'package:swifty_companion/display_info.dart';
 import 'dart:convert';
 
 import 'package:swifty_companion/hive_helper.dart';
@@ -19,35 +20,43 @@ class _SearchState extends State<Search> {
 
   void _onSubmit() async {
     print('is clicked');
+  // Close the keyboard
+  FocusScope.of(context).unfocus();
+  
+  // Your existing submit logic here
     try {
       if (formState.currentState!.validate()) {
         setState(() {
           _isLoading = true;
         });
 
-        final data = await ApiCall.getUserByLogin(_login.text, context);
+        final data = await ApiCall.getUserByLogin(_login.text.trim(), context);
         if (data != null) {
-          print(data);
+          _login.text = "";
+          // Navigate to a new screen
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => DisplayInfo(userData: data,)),
+          );
         }
       }
     } catch (e) {
       String errorString = e.toString();
-  
-  // Extract just the reason phrase after the colon and space
-  if (errorString.contains(':')) {
-    List<String> parts = errorString.split(': ');
-    if (parts.length >= 3) {
-      String reasonPhrase = parts[2]; // Gets the part after "statusCode: "
-      print('Reason: $reasonPhrase');
-      
-      if (reasonPhrase.contains('Not Found')) {
-        print('User not found');
+
+      // Extract just the reason phrase after the colon and space
+      if (errorString.contains(':')) {
+        List<String> parts = errorString.split(': ');
+        if (parts.length >= 3) {
+          String reasonPhrase = parts[2]; // Gets the part after "statusCode: "
+          print('Reason: $reasonPhrase');
+
+          if (reasonPhrase.contains('Not Found')) {
+            print('User not found');
+          }
+        }
       }
-    }
-  }
-  
-  print('Full error: $errorString');
-     
+
+      print('Full error: $errorString');
     } finally {
       setState(() {
         _isLoading = false;
